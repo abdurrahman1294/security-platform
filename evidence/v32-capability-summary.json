@@ -1,0 +1,148 @@
+{
+  "maturity_score": 83.3,
+  "status_counts": {
+    "implemented-not-executed": 32,
+    "executed-evidence-backed": 1,
+    "human-required": 9,
+    "implemented-but-tool-missing": 14,
+    "gap": 1,
+    "lab-only": 7
+  },
+  "priority_gaps": [
+    {
+      "id": "mobile.ios.dynamic",
+      "domain": "mobile_wireless",
+      "name": "iOS simulator/runtime dynamic inspection",
+      "reason": "gap",
+      "missing_tools": []
+    },
+    {
+      "id": "cloud.aws",
+      "domain": "cloud",
+      "name": "AWS read-only inventory",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "aws"
+      ]
+    },
+    {
+      "id": "cloud.azure",
+      "domain": "cloud",
+      "name": "Azure read-only assessment",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "az"
+      ]
+    },
+    {
+      "id": "cloud.gcp",
+      "domain": "cloud",
+      "name": "GCP read-only assessment",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "gcloud"
+      ]
+    },
+    {
+      "id": "cloud.k8s",
+      "domain": "cloud",
+      "name": "Kubernetes read-only assessment",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "kubectl"
+      ]
+    },
+    {
+      "id": "infra.cve",
+      "domain": "infrastructure",
+      "name": "CVE/exposure correlation",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nuclei"
+      ]
+    },
+    {
+      "id": "infra.service",
+      "domain": "infrastructure",
+      "name": "service/version enumeration",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nmap"
+      ]
+    },
+    {
+      "id": "recon.http",
+      "domain": "reconnaissance",
+      "name": "HTTP service discovery and fingerprinting",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "httpx"
+      ]
+    },
+    {
+      "id": "recon.ports",
+      "domain": "reconnaissance",
+      "name": "port and service discovery",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "naabu",
+        "nmap"
+      ]
+    },
+    {
+      "id": "recon.subdomains",
+      "domain": "reconnaissance",
+      "name": "subdomain/asset discovery",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "assetfinder",
+        "subfinder"
+      ]
+    },
+    {
+      "id": "recon.webcrawl",
+      "domain": "reconnaissance",
+      "name": "web crawling and URL inventory",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "katana"
+      ]
+    },
+    {
+      "id": "web.vuln",
+      "domain": "web_api",
+      "name": "automated web vulnerability discovery",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nuclei"
+      ]
+    },
+    {
+      "id": "ad.policy",
+      "domain": "windows_ad",
+      "name": "password-policy assessment",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nxc"
+      ]
+    },
+    {
+      "id": "ad.shares",
+      "domain": "windows_ad",
+      "name": "SMB/share enumeration",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nxc"
+      ]
+    },
+    {
+      "id": "ad.users",
+      "domain": "windows_ad",
+      "name": "AD users/groups/computers enumeration",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nxc"
+      ]
+    }
+  ]
+}

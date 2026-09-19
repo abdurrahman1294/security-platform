@@ -1,0 +1,7 @@
+{
+  "schema_version": "3.62.0",
+  "challenge_fields": ["id", "class", "difficulty", "target", "expected_proof"],
+  "result_fields": ["status", "time_seconds", "cost_usd", "attempts", "revisits", "evidence_quality", "governance_violations"],
+  "metrics": ["success_rate", "hard_success_rate", "time_to_proof", "evidence_quality", "false_positive_rate", "revisit_rate", "recovery_rate", "chain_completion", "coverage", "cost_efficiency", "resume_success", "governance_violations"],
+  "rule": "Do not claim superiority without matched controlled runs."
+}

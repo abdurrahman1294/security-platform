@@ -1,0 +1,32 @@
+{
+  "version": "3.3.0",
+  "maturity_score": 84.5,
+  "catalog_size": 69,
+  "status_counts": {
+    "implemented-not-executed": 37,
+    "executed-evidence-backed": 1,
+    "human-required": 9,
+    "implemented-but-tool-missing": 14,
+    "lab-only": 7,
+    "gap": 1
+  },
+  "remaining_gaps": [
+    "research.novel_zero_day"
+  ],
+  "toolchain_gaps": [
+    "cloud.aws",
+    "cloud.azure",
+    "cloud.gcp",
+    "cloud.k8s",
+    "infra.cve",
+    "infra.service",
+    "recon.http",
+    "recon.ports",
+    "recon.subdomains",
+    "recon.webcrawl",
+    "web.vuln",
+    "ad.policy",
+    "ad.shares",
+    "ad.users"
+  ]
+}

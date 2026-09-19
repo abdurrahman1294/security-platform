@@ -1,0 +1,1003 @@
+{
+  "schema_version": "2.7",
+  "scope": "expert pentest and red-team capability coverage audit",
+  "catalog_size": 69,
+  "maturity_score": 84.5,
+  "status_counts": {
+    "implemented-not-executed": 37,
+    "executed-evidence-backed": 1,
+    "human-required": 9,
+    "implemented-but-tool-missing": 14,
+    "lab-only": 7,
+    "gap": 1
+  },
+  "capabilities": [
+    {
+      "id": "pre.scope",
+      "name": "scope and authorization validation",
+      "mode": "native",
+      "evidence": [],
+      "domain": "pre_engagement",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "pre.roe",
+      "name": "rules-of-engagement validation",
+      "mode": "native",
+      "evidence": [
+        "config_roe.example.json"
+      ],
+      "domain": "pre_engagement",
+      "status": "executed-evidence-backed",
+      "missing_tools": [],
+      "evidence_present": true
+    },
+    {
+      "id": "pre.toolchain",
+      "name": "toolchain readiness assessment",
+      "mode": "native",
+      "evidence": [
+        "evidence/engine-health-v26.json"
+      ],
+      "domain": "pre_engagement",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "pre.objectives",
+      "name": "assessment objective and test-plan definition",
+      "mode": "human-assisted",
+      "evidence": [],
+      "domain": "pre_engagement",
+      "status": "human-required",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "recon.subdomains",
+      "name": "subdomain/asset discovery",
+      "mode": "tool-backed",
+      "tools": [
+        "subfinder",
+        "assetfinder"
+      ],
+      "evidence": [
+        "recon/subdomains.txt"
+      ],
+      "domain": "reconnaissance",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "assetfinder",
+        "subfinder"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "recon.http",
+      "name": "HTTP service discovery and fingerprinting",
+      "mode": "tool-backed",
+      "tools": [
+        "httpx"
+      ],
+      "evidence": [
+        "recon/live-hosts.txt"
+      ],
+      "domain": "reconnaissance",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "httpx"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "recon.ports",
+      "name": "port and service discovery",
+      "mode": "tool-backed",
+      "tools": [
+        "naabu",
+        "nmap"
+      ],
+      "evidence": [
+        "ports/naabu.txt",
+        "ports/nmap-detailed.nmap",
+        "ports/nmap-top.nmap"
+      ],
+      "domain": "reconnaissance",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "naabu",
+        "nmap"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "recon.webcrawl",
+      "name": "web crawling and URL inventory",
+      "mode": "tool-backed",
+      "tools": [
+        "katana"
+      ],
+      "evidence": [
+        "web/urls.txt"
+      ],
+      "domain": "reconnaissance",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "katana"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "recon.dns",
+      "name": "DNS/address observation",
+      "mode": "native",
+      "evidence": [
+        "evidence/dns-observation-v27.json"
+      ],
+      "domain": "reconnaissance",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "recon.attack_surface",
+      "name": "cross-source attack-surface normalization",
+      "mode": "native",
+      "evidence": [
+        "evidence/cross-engine-correlation-v26.json"
+      ],
+      "domain": "reconnaissance",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "web.vuln",
+      "name": "automated web vulnerability discovery",
+      "mode": "tool-backed",
+      "tools": [
+        "nuclei"
+      ],
+      "evidence": [
+        "vulns/findings.json",
+        "vulns/findings.txt"
+      ],
+      "domain": "web_api",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nuclei"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "web.auth",
+      "name": "authenticated web assessment",
+      "mode": "native",
+      "evidence": [
+        "web/authenticated"
+      ],
+      "domain": "web_api",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "web.session",
+      "name": "session security assessment",
+      "mode": "native",
+      "evidence": [],
+      "domain": "web_api",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "web.client",
+      "name": "client-side security heuristics",
+      "mode": "native",
+      "evidence": [],
+      "domain": "web_api",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "web.logic",
+      "name": "business-logic and workflow assessment",
+      "mode": "human-assisted",
+      "evidence": [],
+      "domain": "web_api",
+      "status": "human-required",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "api.rest",
+      "name": "REST/API surface assessment",
+      "mode": "native",
+      "evidence": [
+        "web/api"
+      ],
+      "domain": "web_api",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "api.openapi",
+      "name": "OpenAPI-driven testing",
+      "mode": "native",
+      "evidence": [],
+      "domain": "web_api",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "api.graphql",
+      "name": "GraphQL assessment",
+      "mode": "lab-validation",
+      "evidence": [],
+      "domain": "web_api",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "api.authz",
+      "name": "BOLA/function/property authorization testing",
+      "mode": "lab-validation",
+      "evidence": [],
+      "domain": "web_api",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "api.ratelimit",
+      "name": "rate-limit/control testing",
+      "mode": "native",
+      "evidence": [],
+      "domain": "web_api",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "api.workflow",
+      "name": "API workflow/state testing",
+      "mode": "human-assisted",
+      "evidence": [],
+      "domain": "web_api",
+      "status": "human-required",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "infra.tls",
+      "name": "TLS configuration observation",
+      "mode": "native",
+      "evidence": [
+        "evidence/tls-observation-v27.json"
+      ],
+      "domain": "infrastructure",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "infra.service",
+      "name": "service/version enumeration",
+      "mode": "tool-backed",
+      "tools": [
+        "nmap"
+      ],
+      "evidence": [
+        "ports/nmap-detailed.nmap"
+      ],
+      "domain": "infrastructure",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nmap"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "infra.management",
+      "name": "management-interface exposure assessment",
+      "mode": "native",
+      "evidence": [],
+      "domain": "infrastructure",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "infra.cve",
+      "name": "CVE/exposure correlation",
+      "mode": "tool-backed",
+      "tools": [
+        "nuclei"
+      ],
+      "evidence": [
+        "vulns/findings.json"
+      ],
+      "domain": "infrastructure",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nuclei"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "infra.segmentation",
+      "name": "network segmentation validation",
+      "mode": "human-assisted",
+      "evidence": [],
+      "domain": "infrastructure",
+      "status": "human-required",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "ad.users",
+      "name": "AD users/groups/computers enumeration",
+      "mode": "tool-backed",
+      "tools": [
+        "nxc"
+      ],
+      "evidence": [
+        "ad"
+      ],
+      "domain": "windows_ad",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nxc"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "ad.shares",
+      "name": "SMB/share enumeration",
+      "mode": "tool-backed",
+      "tools": [
+        "nxc"
+      ],
+      "evidence": [
+        "ad"
+      ],
+      "domain": "windows_ad",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nxc"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "ad.policy",
+      "name": "password-policy assessment",
+      "mode": "tool-backed",
+      "tools": [
+        "nxc"
+      ],
+      "evidence": [
+        "ad"
+      ],
+      "domain": "windows_ad",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nxc"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "ad.acl",
+      "name": "ACL/delegation/trust analysis",
+      "mode": "native",
+      "evidence": [
+        "evidence/ad-relationships-v32.json"
+      ],
+      "domain": "windows_ad",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "ad.kerberos",
+      "name": "Kerberos relationship analysis",
+      "mode": "native",
+      "evidence": [
+        "evidence/ad-relationships-v32.json"
+      ],
+      "domain": "windows_ad",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "ad.attackpath",
+      "name": "privilege-path analysis",
+      "mode": "native",
+      "evidence": [],
+      "domain": "windows_ad",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "cloud.aws",
+      "name": "AWS read-only inventory",
+      "mode": "tool-backed",
+      "tools": [
+        "aws"
+      ],
+      "evidence": [
+        "aws"
+      ],
+      "domain": "cloud",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "aws"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "cloud.iam",
+      "name": "cloud identity/trust analysis",
+      "mode": "native",
+      "evidence": [],
+      "domain": "cloud",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "cloud.storage",
+      "name": "cloud storage exposure assessment",
+      "mode": "native",
+      "evidence": [],
+      "domain": "cloud",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "cloud.network",
+      "name": "cloud network/security-group analysis",
+      "mode": "native",
+      "evidence": [],
+      "domain": "cloud",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "cloud.azure",
+      "name": "Azure read-only assessment",
+      "mode": "tool-backed",
+      "tools": [
+        "az"
+      ],
+      "evidence": [
+        "evidence/cloud-azure-live-v32.json",
+        "evidence/cloud-azure-assessment-v32.json"
+      ],
+      "domain": "cloud",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "az"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "cloud.gcp",
+      "name": "GCP read-only assessment",
+      "mode": "tool-backed",
+      "tools": [
+        "gcloud"
+      ],
+      "evidence": [
+        "evidence/cloud-gcp-live-v32.json",
+        "evidence/cloud-gcp-assessment-v32.json"
+      ],
+      "domain": "cloud",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "gcloud"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "cloud.k8s",
+      "name": "Kubernetes read-only assessment",
+      "mode": "tool-backed",
+      "tools": [
+        "kubectl"
+      ],
+      "evidence": [
+        "evidence/cloud-kubernetes-live-v32.json",
+        "evidence/cloud-kubernetes-assessment-v32.json"
+      ],
+      "domain": "cloud",
+      "status": "implemented-but-tool-missing",
+      "missing_tools": [
+        "kubectl"
+      ],
+      "evidence_present": false
+    },
+    {
+      "id": "mobile.apk",
+      "name": "Android APK static assessment",
+      "mode": "native",
+      "evidence": [
+        "android-analysis.json"
+      ],
+      "domain": "mobile_wireless",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "mobile.dynamic",
+      "name": "Android emulator read-only dynamic inspection",
+      "mode": "native",
+      "evidence": [],
+      "domain": "mobile_wireless",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "mobile.ios",
+      "name": "iOS application static assessment",
+      "mode": "native",
+      "evidence": [
+        "evidence/ios-static-v32.json"
+      ],
+      "domain": "mobile_wireless",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "mobile.ios.dynamic",
+      "name": "iOS simulator/runtime dynamic inspection",
+      "mode": "native",
+      "evidence": [
+        "evidence/ios-dynamic-v33.json"
+      ],
+      "domain": "mobile_wireless",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "wireless.pcap",
+      "name": "wireless PCAP analysis",
+      "mode": "native",
+      "evidence": [],
+      "domain": "mobile_wireless",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "wireless.radio",
+      "name": "Wi-Fi interface/radio inventory",
+      "mode": "native",
+      "evidence": [],
+      "domain": "mobile_wireless",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "wireless.rogue",
+      "name": "rogue-AP/segmentation analysis",
+      "mode": "native",
+      "evidence": [],
+      "domain": "mobile_wireless",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "wireless.ble",
+      "name": "Bluetooth/BLE passive assessment",
+      "mode": "native",
+      "evidence": [
+        "evidence/ble-assessment-v32.json"
+      ],
+      "domain": "mobile_wireless",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "remote.rce",
+      "name": "controlled RCE proof",
+      "mode": "lab-only",
+      "evidence": [
+        "remote-assessment.json"
+      ],
+      "domain": "remote_red_team",
+      "status": "lab-only",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "remote.command",
+      "name": "controlled command-injection proof",
+      "mode": "lab-only",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "lab-only",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "remote.creds",
+      "name": "credential-exposure validation",
+      "mode": "lab-only",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "lab-only",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "remote.privesc",
+      "name": "controlled privilege-escalation proof",
+      "mode": "lab-only",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "lab-only",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "remote.persistence",
+      "name": "controlled persistence proof",
+      "mode": "lab-only",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "lab-only",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "remote.lateral",
+      "name": "controlled lateral-access proof",
+      "mode": "lab-only",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "lab-only",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "remote.objective",
+      "name": "controlled objective-access proof",
+      "mode": "lab-only",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "lab-only",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "redteam.c2",
+      "name": "C2/malware operations",
+      "mode": "restricted-human-led",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "human-required",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "redteam.evasion",
+      "name": "evasion/stealth tradecraft",
+      "mode": "restricted-human-led",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "human-required",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "redteam.physical",
+      "name": "physical/social-engineering operations",
+      "mode": "human-led",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "human-required",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "redteam.destructive",
+      "name": "destructive-impact simulation",
+      "mode": "restricted-human-led",
+      "evidence": [],
+      "domain": "remote_red_team",
+      "status": "human-required",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "research.novel_zero_day",
+      "name": "novel zero-day discovery and exploit research",
+      "mode": "gap",
+      "evidence": [],
+      "domain": "research_limits",
+      "status": "gap",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "network.database_surface",
+      "name": "database exposure analysis",
+      "mode": "native",
+      "evidence": [
+        "evidence/database-surface-v33.json"
+      ],
+      "domain": "depth_expansion",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "network.device_config",
+      "name": "network-device configuration review",
+      "mode": "native",
+      "evidence": [
+        "evidence/network-device-config-v33.json"
+      ],
+      "domain": "depth_expansion",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "cloud.container_static",
+      "name": "container image static security assessment",
+      "mode": "native",
+      "evidence": [
+        "evidence/container-security-v33.json"
+      ],
+      "domain": "depth_expansion",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "mobile.ios.runtime",
+      "name": "iOS simulator runtime inspection",
+      "mode": "native",
+      "evidence": [
+        "evidence/ios-dynamic-v33.json"
+      ],
+      "domain": "depth_expansion",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "analysis.correlation",
+      "name": "cross-engine evidence correlation",
+      "mode": "native",
+      "evidence": [
+        "evidence/cross-engine-correlation-v26.json"
+      ],
+      "domain": "analysis_reporting",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "analysis.integrity",
+      "name": "artifact integrity inventory",
+      "mode": "native",
+      "evidence": [
+        "evidence/artifact-inventory-v26.json"
+      ],
+      "domain": "analysis_reporting",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "analysis.coverage",
+      "name": "truthful execution coverage",
+      "mode": "native",
+      "evidence": [
+        "evidence/coverage-v26.json"
+      ],
+      "domain": "analysis_reporting",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "analysis.reporting",
+      "name": "technical/executive reporting",
+      "mode": "native",
+      "evidence": [
+        "reports"
+      ],
+      "domain": "analysis_reporting",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "analysis.retest",
+      "name": "retest/closure tracking",
+      "mode": "native",
+      "evidence": [],
+      "domain": "analysis_reporting",
+      "status": "implemented-not-executed",
+      "missing_tools": [],
+      "evidence_present": false
+    },
+    {
+      "id": "analysis.attribution",
+      "name": "final threat attribution",
+      "mode": "human-led",
+      "evidence": [],
+      "domain": "analysis_reporting",
+      "status": "human-required",
+      "missing_tools": [],
+      "evidence_present": false
+    }
+  ],
+  "priority_gaps": [
+    {
+      "id": "research.novel_zero_day",
+      "domain": "research_limits",
+      "name": "novel zero-day discovery and exploit research",
+      "reason": "gap",
+      "missing_tools": []
+    },
+    {
+      "id": "cloud.aws",
+      "domain": "cloud",
+      "name": "AWS read-only inventory",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "aws"
+      ]
+    },
+    {
+      "id": "cloud.azure",
+      "domain": "cloud",
+      "name": "Azure read-only assessment",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "az"
+      ]
+    },
+    {
+      "id": "cloud.gcp",
+      "domain": "cloud",
+      "name": "GCP read-only assessment",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "gcloud"
+      ]
+    },
+    {
+      "id": "cloud.k8s",
+      "domain": "cloud",
+      "name": "Kubernetes read-only assessment",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "kubectl"
+      ]
+    },
+    {
+      "id": "infra.cve",
+      "domain": "infrastructure",
+      "name": "CVE/exposure correlation",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nuclei"
+      ]
+    },
+    {
+      "id": "infra.service",
+      "domain": "infrastructure",
+      "name": "service/version enumeration",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nmap"
+      ]
+    },
+    {
+      "id": "recon.http",
+      "domain": "reconnaissance",
+      "name": "HTTP service discovery and fingerprinting",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "httpx"
+      ]
+    },
+    {
+      "id": "recon.ports",
+      "domain": "reconnaissance",
+      "name": "port and service discovery",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "naabu",
+        "nmap"
+      ]
+    },
+    {
+      "id": "recon.subdomains",
+      "domain": "reconnaissance",
+      "name": "subdomain/asset discovery",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "assetfinder",
+        "subfinder"
+      ]
+    },
+    {
+      "id": "recon.webcrawl",
+      "domain": "reconnaissance",
+      "name": "web crawling and URL inventory",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "katana"
+      ]
+    },
+    {
+      "id": "web.vuln",
+      "domain": "web_api",
+      "name": "automated web vulnerability discovery",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nuclei"
+      ]
+    },
+    {
+      "id": "ad.policy",
+      "domain": "windows_ad",
+      "name": "password-policy assessment",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nxc"
+      ]
+    },
+    {
+      "id": "ad.shares",
+      "domain": "windows_ad",
+      "name": "SMB/share enumeration",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nxc"
+      ]
+    },
+    {
+      "id": "ad.users",
+      "domain": "windows_ad",
+      "name": "AD users/groups/computers enumeration",
+      "reason": "implemented-but-tool-missing",
+      "missing_tools": [
+        "nxc"
+      ]
+    }
+  ],
+  "interpretation": "The score measures platform coverage, not offensive effectiveness. Evidence-backed execution is distinct from implementation; human-led and restricted activities remain explicitly visible.",
+  "red_team_boundary": [
+    "No unrestricted malware/C2",
+    "No stealth/evasion automation",
+    "No destructive automation",
+    "No uncontrolled propagation",
+    "No real-data exfiltration"
+  ]
+}

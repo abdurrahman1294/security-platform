@@ -1,0 +1,18 @@
+{
+  "completion_rule": "No production-ready claim when hardening audit or quality gate requires review.",
+  "controls": {
+    "atomic_artifacts": true,
+    "bounded_arguments": true,
+    "bounded_timeouts": true,
+    "fail_closed_scope": true,
+    "no_covert_tracking": true,
+    "no_hidden_agents": true,
+    "no_private_account_access": true,
+    "operator_approval_for_active_testing": true,
+    "private_osint_networks_blocked": true,
+    "registered_tool_only": true,
+    "secret_environment_filtering": true,
+    "shell_execution": false
+  },
+  "schema_version": "164.0"
+}

@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=75,<77"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pentest-automation-framework"
+version = "5.2.0"
+description = "Scope-controlled, evidence-driven security assessment automation platform"
+requires-python = ">=3.11,<3.14"
+dependencies = [
+  "PyYAML==6.0.3",
+  "Pillow==11.3.0",
+]
+
+[project.optional-dependencies]
+test = ["pytest==9.0.2"]
+web = ["fastapi>=0.120,<1", "uvicorn>=0.30,<1"]
+
+[project.scripts]
+securityctl = "security_platform.cli.securityctl:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 120
+exclude = ["__pycache__", ".pytest_cache"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+
+[tool.setuptools]
+py-modules = ["orchestrator", "run"]
+
+[tool.setuptools.packages.find]
+include = ["modules*", "security_platform*"]
+

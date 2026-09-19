@@ -1,0 +1,12 @@
+{
+  "enable_r4": false,
+  "allowed_r4_actions": [],
+  "max_impact": "high",
+  "fake_data_only": true,
+  "production_change_allowed": false,
+  "third_party_assets_allowed": false,
+  "time_window": null,
+  "emergency_stop": false,
+  "operator": "",
+  "engagement_reference": ""
+}

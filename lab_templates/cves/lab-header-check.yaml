@@ -1,0 +1,18 @@
+id: lab-header-check
+
+info:
+  name: Lab synthetic security marker
+  author: security-platform-lab
+  severity: medium
+  description: Detects the deliberately vulnerable marker exposed by the local lab fixture.
+  tags: lab,synthetic
+
+http:
+  - method: GET
+    path:
+      - "{{BaseURL}}/"
+    matchers:
+      - type: word
+        part: header
+        words:
+          - "X-Lab-Marker: vulnerable"

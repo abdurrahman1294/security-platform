@@ -1,0 +1,23 @@
+{
+  "artifact_hashes": [],
+  "controls": {
+    "atomic_artifact_writes": true,
+    "fail_closed_on_missing_scope": true,
+    "no_covert_tracking": true,
+    "no_credential_harvesting": true,
+    "no_license_bypass": true,
+    "no_private_account_access": true,
+    "operator_approval_for_active_actions": true,
+    "private_network_osint_blocked": true,
+    "provenance_hashing": true,
+    "secret_redaction_before_indexing": true,
+    "strict_public_osint_url_policy": true,
+    "truthful_completion_gate": true
+  },
+  "quality": {
+    "artifact_count": 0,
+    "generated_at": "2026-09-03T05:14:40.636242+00:00"
+  },
+  "schema_version": "161-175.0",
+  "target": "pretest.example"
+}

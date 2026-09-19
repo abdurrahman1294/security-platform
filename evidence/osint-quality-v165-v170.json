@@ -1,0 +1,21 @@
+{
+  "generated_at": "2026-09-03T05:14:40.781401+00:00",
+  "image_analysis": {
+    "gps_is_unverified_until_corroborated": true,
+    "local_metadata": true,
+    "reverse_search": "operator-assisted public service workflow",
+    "sha256": true
+  },
+  "images": [],
+  "schema_version": "165-170.0",
+  "source_quality": {
+    "independent_corroboration_for_high_confidence": true,
+    "provenance_required": true,
+    "stale_data_flagging": true
+  },
+  "tracking_policy": {
+    "covert_tracking": "blocked",
+    "lost_device": "owner-controlled official recovery only",
+    "person_tracking": "not provided"
+  }
+}

@@ -1,0 +1,495 @@
+=== diff: modules/findings_io.py ===
+--- /tmp/findings_io.orig.py	2026-09-03 10:32:27.490621701 +0000
++++ modules/findings_io.py	2026-09-03 10:32:39.041666962 +0000
+@@ -14,10 +14,16 @@
+ from __future__ import annotations
+ 
+ import json
++import logging
+ from pathlib import Path
++from typing import Any, Dict, List, Union
+ 
++logger = logging.getLogger(__name__)
+ 
+-def load_findings_file(path) -> list:
++PathLike = Union[str, Path]
++
++
++def load_findings_file(path: PathLike) -> List[Dict[str, Any]]:
+     """Load a list of dict findings from `path`, tolerating either a JSON
+     array or newline-delimited JSON objects. Never raises: a missing,
+     empty, or unreadable file just yields an empty list -- callers should
+@@ -28,13 +34,15 @@
+         return []
+     try:
+         raw = p.read_text(encoding="utf-8", errors="ignore").strip()
+-    except OSError:
++    except OSError as exc:
++        logger.warning("findings_io: could not read %s: %s", p, exc)
+         return []
+     if not raw:
+         return []
++
+     if raw[0] in "[{":
+         try:
+-            data = json.loads(raw)
++            data: Any = json.loads(raw)
+         except json.JSONDecodeError:
+             data = None
+         if data is not None:
+@@ -43,8 +51,16 @@
+                     data = data["findings"]
+                 else:
+                     data = [data]
+-            return [item for item in data if isinstance(item, dict)] if isinstance(data, list) else []
+-    items = []
++            if isinstance(data, list):
++                return [item for item in data if isinstance(item, dict)]
++            return []
++        # Whole-file parse failed even though it starts with '[' or '{' --
++        # most likely this is JSONL where the first line happens to start
++        # with '{' (e.g. nuclei -jsonl). Fall through to line-by-line
++        # parsing below instead of treating it as empty.
++
++    items: List[Dict[str, Any]] = []
++    skipped = 0
+     for line in raw.splitlines():
+         line = line.strip()
+         if not line:
+@@ -52,7 +68,24 @@
+         try:
+             obj = json.loads(line)
+         except json.JSONDecodeError:
++            skipped += 1
+             continue
+         if isinstance(obj, dict):
+             items.append(obj)
++        else:
++            skipped += 1
++    if skipped:
++        logger.debug("findings_io: skipped %d unparseable/non-object line(s) in %s", skipped, p)
+     return items
++
++
++def load_findings_files(paths: List[PathLike]) -> List[Dict[str, Any]]:
++    """Load and concatenate findings from several files, in order. A
++    convenience wrapper for callers (report_pack, correlation_engine,
++    finding_dedup, ...) that all read the same fixed set of findings
++    paths -- keeps the per-file tolerant-loading logic in exactly one
++    place rather than each caller writing its own loop."""
++    out: List[Dict[str, Any]] = []
++    for p in paths:
++        out.extend(load_findings_file(p))
++    return out
+=== diff: modules/evidence_manager.py ===
+--- /tmp/evidence_manager.orig.py	2026-09-03 10:32:27.491946813 +0000
++++ modules/evidence_manager.py	2026-09-03 10:32:53.553677308 +0000
+@@ -4,11 +4,16 @@
+ This module indexes evidence; it never uploads, executes, or exposes secrets.
+ """
+ from __future__ import annotations
+-import hashlib, json
++import hashlib
+ from datetime import datetime, timezone
+ from pathlib import Path
++from typing import Union
++
++from .atomic_io import atomic_write_json, atomic_write_text
+ 
+ SENSITIVE_NAMES = {"credentials.json", "exploitation-log.txt"}
++SENSITIVE_SUFFIXES = {".pem", ".key", ".pfx", ".p12"}
++
+ 
+ def _sha256(path: Path) -> str:
+     h = hashlib.sha256()
+@@ -17,6 +22,7 @@
+             h.update(chunk)
+     return h.hexdigest()
+ 
++
+ def _kind(path: Path) -> str:
+     ext = path.suffix.lower()
+     if ext in {".png", ".jpg", ".jpeg", ".webp"}: return "screenshot"
+@@ -24,30 +30,72 @@
+     if ext in {".pcap", ".pcapng"}: return "network-capture"
+     if ext in {".txt", ".log"}: return "text-log"
+     if ext in {".md", ".html"}: return "report"
++    if ext in {".pdf"}: return "document"
++    if ext in {".csv", ".tsv"}: return "tabular-data"
+     return "artifact"
+ 
+-def build_evidence_index(outdir: str | Path) -> Path:
+-    root = Path(outdir); ev = root / "evidence"; ev.mkdir(parents=True, exist_ok=True)
++
++def _is_sensitive(path: Path) -> bool:
++    return path.name in SENSITIVE_NAMES or path.suffix.lower() in SENSITIVE_SUFFIXES
++
++
++def build_evidence_index(outdir: Union[str, Path]) -> Path:
++    root = Path(outdir)
++    ev = root / "evidence"
++    ev.mkdir(parents=True, exist_ok=True)
++    index_path = ev / "evidence-index.json"
++    md_path = ev / "evidence-index.md"
++
+     entries = []
++    skipped = []
+     for p in sorted(root.rglob("*")):
+-        if not p.is_file() or "evidence" not in p.parts and p.name == "evidence-index.json":
++        if not p.is_file():
+             continue
+-        if p == ev / "evidence-index.json":
++        # Never index the index's own output files. The previous version
++        # of this check was `"evidence" not in p.parts and p.name ==
++        # "evidence-index.json"` combined with `or` -- operator precedence
++        # made the right-hand side almost always False (the index always
++        # lives under an "evidence" dir), so it degraded to just
++        # `not p.is_file()`. A separate explicit check below caught the
++        # .json file but never the .md file, so evidence-index.md was
++        # folded back into its own index and re-hashed on every run.
++        if p in (index_path, md_path):
+             continue
+         rel = str(p.relative_to(root)).replace("\\", "/")
++        try:
++            sha = _sha256(p)
++            size = p.stat().st_size
++        except OSError as exc:
++            # A file that vanished, or that we don't have permission to
++            # read, previously crashed the whole index build. Skip it and
++            # say so in the output instead of losing the rest of the run.
++            skipped.append({"path": rel, "reason": str(exc)})
++            continue
+         entries.append({
+             "evidence_id": "E-" + hashlib.sha256(rel.encode()).hexdigest()[:10],
+             "path": rel,
+             "type": _kind(p),
+-            "size": p.stat().st_size,
+-            "sha256": _sha256(p),
+-            "sensitive_filename": p.name in SENSITIVE_NAMES,
++            "size": size,
++            "sha256": sha,
++            "sensitive_filename": _is_sensitive(p),
+         })
+-    payload = {"schema_version":"1.0", "generated":datetime.now(timezone.utc).isoformat(), "entries":entries}
+-    path = ev / "evidence-index.json"; path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+-    md = ev / "evidence-index.md"
+-    lines = ["# Evidence Index", "", f"Generated: {payload['generated']}", "", "| Evidence | Type | Path | SHA-256 |", "|---|---|---|---|"]
++
++    payload = {
++        "schema_version": "1.1",
++        "generated": datetime.now(timezone.utc).isoformat(),
++        "entry_count": len(entries),
++        "skipped_unreadable": skipped,
++        "entries": entries,
++    }
++    atomic_write_json(index_path, payload)
++
++    lines = ["# Evidence Index", "", f"Generated: {payload['generated']}", ""]
++    if skipped:
++        lines.append(f"> {len(skipped)} file(s) could not be read and were skipped from this index.")
++        lines.append("")
++    lines += ["| Evidence | Type | Path | SHA-256 |", "|---|---|---|---|"]
+     for e in entries:
+-        lines.append(f"| `{e['evidence_id']}` | {e['type']} | `{e['path']}` | `{e['sha256'][:16]}…` |")
+-    md.write_text("\n".join(lines) + "\n", encoding="utf-8")
+-    return path
++        flag = " ⚠️" if e["sensitive_filename"] else ""
++        lines.append(f"| `{e['evidence_id']}` | {e['type']} | `{e['path']}`{flag} | `{e['sha256'][:16]}…` |")
++    atomic_write_text(md_path, "\n".join(lines) + "\n")
++    return index_path
+=== diff: modules/tool_manager_v40.py ===
+--- /tmp/tool_manager_v40.orig.py	2026-09-03 10:32:27.493131854 +0000
++++ modules/tool_manager_v40.py	2026-09-03 10:33:08.206116073 +0000
+@@ -1,11 +1,21 @@
+ #!/usr/bin/env python3
+-"""V40 allowlisted tool execution manager with durable command ledger."""
++"""V40 allowlisted tool execution manager with durable command ledger.
++
++Only the tools listed in TOOLS can be executed, and only after
++validate_argv() has approved the argument list -- this manager has no
++path to run an arbitrary shell command. Every invocation (success,
++failure, or timeout) is recorded to an on-disk ledger for auditability.
++"""
+ from __future__ import annotations
+-import json, subprocess, uuid, os
++import subprocess, uuid
+ from dataclasses import dataclass
+ from datetime import datetime, timezone
+ from pathlib import Path
++from typing import List, Optional, Union
++
+ from .tool_adapter_hardening_v162 import executable_path, sanitized_environment, validate_argv
++from .atomic_io import atomic_write_json, load_json
++
+ 
+ @dataclass(frozen=True)
+ class ToolSpec:
+@@ -14,6 +24,7 @@
+     description: str
+     default_timeout: int = 600
+ 
++
+ TOOLS = {
+     "subfinder": ToolSpec("subfinder", "subfinder", "Subdomain discovery"),
+     "assetfinder": ToolSpec("assetfinder", "assetfinder", "Asset discovery"),
+@@ -24,34 +35,80 @@
+     "nuclei": ToolSpec("nuclei", "nuclei", "Vulnerability discovery"),
+ }
+ 
++
+ class ToolManager:
+-    def __init__(self, root: str | Path):
+-        self.root=Path(root); self.path=self.root/"evidence"/"tool-execution-ledger-v40.json"
+-        self.path.parent.mkdir(parents=True,exist_ok=True)
+-        self.rows=self._load()
+-    def _load(self):
+-        if not self.path.exists(): return []
+-        try:
+-            x=json.loads(self.path.read_text(encoding="utf-8")); return x if isinstance(x,list) else []
+-        except Exception: return []
+-    def _save(self): self.path.write_text(json.dumps(self.rows,indent=2),encoding="utf-8")
+-    def run(self, tool_id, argv, *, timeout=None, cwd=None):
+-        if tool_id not in TOOLS: raise ValueError(f"Tool is not allowlisted: {tool_id}")
++    def __init__(self, root: Union[str, Path]):
++        self.root = Path(root)
++        self.path = self.root / "evidence" / "tool-execution-ledger-v40.json"
++        self.path.parent.mkdir(parents=True, exist_ok=True)
++        self.rows = self._load()
++
++    def _load(self) -> list:
++        rows = load_json(self.path, [])
++        return rows if isinstance(rows, list) else []
++
++    def _save(self) -> None:
++        # Atomic write: a plain write_text() could leave a truncated,
++        # invalid ledger behind if the process died mid-write, which then
++        # made the next run's _load() silently discard the entire
++        # execution history and start over from an empty ledger.
++        atomic_write_json(self.path, self.rows)
++
++    def run(self, tool_id: str, argv: List[str], *, timeout: Optional[int] = None, cwd=None):
++        if tool_id not in TOOLS:
++            raise ValueError(f"Tool is not allowlisted: {tool_id}")
+         ok, reason = validate_argv(tool_id, argv)
+-        if not ok: raise ValueError(f"Invalid tool arguments: {reason}")
++        if not ok:
++            raise ValueError(f"Invalid tool arguments: {reason}")
+         resolved = executable_path(tool_id)
+-        if resolved is None: raise FileNotFoundError(f"Tool is not installed: {tool_id}")
+-        started=datetime.now(timezone.utc).isoformat(); eid=f"TEX-{uuid.uuid4().hex[:10]}"
++        if resolved is None:
++            raise FileNotFoundError(f"Tool is not installed: {tool_id}")
++
++        started = datetime.now(timezone.utc).isoformat()
++        eid = f"TEX-{uuid.uuid4().hex[:10]}"
+         try:
+-            proc=subprocess.run([resolved, *[str(x) for x in argv[1:]]], shell=False, capture_output=True, text=True,
+-                                timeout=timeout or TOOLS[tool_id].default_timeout, cwd=cwd, env=sanitized_environment())
+-            row={"execution_id":eid,"tool_id":tool_id,"argv":list(map(str,argv)),"returncode":proc.returncode,
+-                 "stdout_bytes":len(proc.stdout.encode()),"stderr_bytes":len(proc.stderr.encode()),
+-                 "started":started,"finished":datetime.now(timezone.utc).isoformat(),"status":"completed" if proc.returncode==0 else "failed"}
+-            self.rows.append(row); self._save(); return proc
+-        except subprocess.TimeoutExpired as exc:
+-            row={"execution_id":eid,"tool_id":tool_id,"argv":list(map(str,argv)),"returncode":None,
+-                 "started":started,"finished":datetime.now(timezone.utc).isoformat(),"status":"timeout"}
+-            self.rows.append(row); self._save(); raise
++            proc = subprocess.run(
++                [resolved, *[str(x) for x in argv[1:]]],
++                shell=False, capture_output=True, text=True,
++                timeout=timeout or TOOLS[tool_id].default_timeout,
++                cwd=cwd, env=sanitized_environment(),
++            )
++            row = {
++                "execution_id": eid, "tool_id": tool_id, "argv": list(map(str, argv)),
++                "returncode": proc.returncode,
++                "stdout_bytes": len(proc.stdout.encode()), "stderr_bytes": len(proc.stderr.encode()),
++                "started": started, "finished": datetime.now(timezone.utc).isoformat(),
++                "status": "completed" if proc.returncode == 0 else "failed",
++            }
++            self.rows.append(row)
++            self._save()
++            return proc
++        except subprocess.TimeoutExpired:
++            row = {
++                "execution_id": eid, "tool_id": tool_id, "argv": list(map(str, argv)),
++                "returncode": None, "started": started,
++                "finished": datetime.now(timezone.utc).isoformat(), "status": "timeout",
++            }
++            self.rows.append(row)
++            self._save()
++            raise
++        except OSError as exc:
++            # e.g. the resolved binary disappeared, lost its executable
++            # bit, or the platform rejected the exec call between
++            # executable_path() and subprocess.run(). Previously
++            # unhandled here, so it crashed the whole assessment run
++            # instead of recording one failed step and letting the rest
++            # of the pipeline continue.
++            row = {
++                "execution_id": eid, "tool_id": tool_id, "argv": list(map(str, argv)),
++                "returncode": None, "started": started,
++                "finished": datetime.now(timezone.utc).isoformat(),
++                "status": "error", "error": str(exc),
++            }
++            self.rows.append(row)
++            self._save()
++            raise
++
+ 
+-def list_tools(): return [{"tool_id":k,"executable":v.executable,"description":v.description,"default_timeout":v.default_timeout} for k,v in TOOLS.items()]
++def list_tools():
++    return [{"tool_id": k, "executable": v.executable, "description": v.description, "default_timeout": v.default_timeout} for k, v in TOOLS.items()]
+=== diff: modules/finding_dedup_v25.py ===
+--- /tmp/finding_dedup_v25.orig.py	2026-09-03 10:32:27.494551404 +0000
++++ modules/finding_dedup_v25.py	2026-09-03 10:33:20.118025515 +0000
+@@ -1,40 +1,87 @@
+ #!/usr/bin/env python3
+ """V25 finding deduplication and lifecycle history. No target interaction."""
+ from __future__ import annotations
+-import hashlib,json,re
+-from datetime import datetime,timezone
++import hashlib, json, re
++from datetime import datetime, timezone
+ from pathlib import Path
+ 
+-def load(p,d):
+-    try:return json.loads(p.read_text(encoding="utf-8")) if p.exists() else d
+-    except Exception:return d
++from .atomic_io import atomic_write_json, atomic_write_text, load_json
++
+ 
+ def norm_title(s):
+-    s=re.sub(r"[^a-z0-9 ]+"," ",str(s).lower()); return re.sub(r"\s+"," ",s).strip()
++    s = re.sub(r"[^a-z0-9 ]+", " ", str(s).lower())
++    return re.sub(r"\s+", " ", s).strip()
++
++
++def _finding_id(f):
++    """A finding missing 'normalized_id' previously raised a bare
++    KeyError and aborted the entire dedup run over one malformed record.
++    Fall back to a stable id derived from the record's own content so
++    the rest of the batch still gets processed and reported."""
++    fid = f.get("normalized_id")
++    if fid:
++        return fid, False
++    seed = json.dumps(f, sort_keys=True, default=str)
++    return "D-UNIDENTIFIED-" + hashlib.sha256(seed.encode()).hexdigest()[:10], True
++
+ 
+ def build(root):
+-    root=Path(root); ev=root/"evidence"; rep=root/"reports"; ev.mkdir(parents=True,exist_ok=True); rep.mkdir(parents=True,exist_ok=True)
+-    data=load(ev/"normalized-findings.json",{"findings":[]}); findings=data.get("findings",[])
+-    groups={}; duplicates=[]
++    root = Path(root)
++    ev = root / "evidence"
++    rep = root / "reports"
++    ev.mkdir(parents=True, exist_ok=True)
++    rep.mkdir(parents=True, exist_ok=True)
++
++    data = load_json(ev / "normalized-findings.json", {"findings": []})
++    findings = data.get("findings", []) if isinstance(data, dict) else []
++
++    groups = {}
++    fallback_count = 0
++    id_cache = {}
+     for f in findings:
+-        key=(norm_title(f.get("title")),f.get("asset"),f.get("severity"))
+-        groups.setdefault(key,[]).append(f["normalized_id"])
+-    clusters=[]
+-    for key,ids in groups.items():
+-        cid="D-"+hashlib.sha256("|".join(sorted(ids)).encode()).hexdigest()[:10]
+-        primary=ids[0]
+-        clusters.append({"cluster_id":cid,"primary":primary,"finding_ids":ids,"reason":"normalized title + asset + severity"})
+-        duplicates += [{"finding_id":x,"primary":primary,"status":"possible-duplicate","confidence":0.9} for x in ids[1:]]
+-    history=load(ev/"finding-history.json",{})
+-    now=datetime.now(timezone.utc).isoformat()
++        fid, was_fallback = _finding_id(f)
++        id_cache[id(f)] = fid
++        if was_fallback:
++            fallback_count += 1
++        key = (norm_title(f.get("title")), f.get("asset"), f.get("severity"))
++        groups.setdefault(key, []).append(fid)
++
++    clusters = []
++    duplicates = []
++    for key, ids in groups.items():
++        cid = "D-" + hashlib.sha256("|".join(sorted(ids)).encode()).hexdigest()[:10]
++        primary = ids[0]
++        clusters.append({"cluster_id": cid, "primary": primary, "finding_ids": ids, "reason": "normalized title + asset + severity"})
++        duplicates += [{"finding_id": x, "primary": primary, "status": "possible-duplicate", "confidence": 0.9} for x in ids[1:]]
++
++    history = load_json(ev / "finding-history.json", {})
++    if not isinstance(history, dict):
++        history = {}
++    now = datetime.now(timezone.utc).isoformat()
+     for f in findings:
+-        fid=f["normalized_id"]; h=history.setdefault(fid,{"finding_id":fid,"events":[]})
+-        if not h["events"] or h["events"][-1].get("fingerprint") != hashlib.sha256(json.dumps(f,sort_keys=True).encode()).hexdigest():
+-            h["events"].append({"timestamp":now,"event":"observed","fingerprint":hashlib.sha256(json.dumps(f,sort_keys=True).encode()).hexdigest(),"severity":f["severity"],"asset":f["asset"]})
+-    payload={"schema_version":"1.0","generated_at":now,"clusters":clusters,"possible_duplicates":duplicates,"history":history}
+-    p=ev/"finding-dedup.json"; p.write_text(json.dumps(payload,indent=2),encoding="utf-8")
+-    (ev/"finding-history.json").write_text(json.dumps(history,indent=2),encoding="utf-8")
+-    lines=["# V25 Finding Deduplication & Lifecycle","",f"Clusters: **{len(clusters)}**",f"Possible duplicate records: **{len(duplicates)}**","","> Duplicate relationships are analyst-review hypotheses; no finding is deleted automatically.",""]
+-    for c in clusters: lines.append(f"- `{c['cluster_id']}` primary `{c['primary']}`: "+", ".join(f"`{x}`" for x in c['finding_ids']))
+-    (rep/"finding-dedup.md").write_text("\n".join(lines)+"\n",encoding="utf-8")
++        fid = id_cache[id(f)]
++        h = history.setdefault(fid, {"finding_id": fid, "events": []})
++        fingerprint = hashlib.sha256(json.dumps(f, sort_keys=True, default=str).encode()).hexdigest()
++        if not h["events"] or h["events"][-1].get("fingerprint") != fingerprint:
++            h["events"].append({
++                "timestamp": now, "event": "observed", "fingerprint": fingerprint,
++                "severity": f.get("severity"), "asset": f.get("asset"),
++            })
++
++    payload = {
++        "schema_version": "1.1", "generated_at": now,
++        "clusters": clusters, "possible_duplicates": duplicates, "history": history,
++        "unidentified_findings": fallback_count,
++    }
++    p = ev / "finding-dedup.json"
++    atomic_write_json(p, payload)
++    atomic_write_json(ev / "finding-history.json", history)
++
++    lines = ["# V25 Finding Deduplication & Lifecycle", "", f"Clusters: **{len(clusters)}**", f"Possible duplicate records: **{len(duplicates)}**"]
++    if fallback_count:
++        lines.append(f"Findings missing a `normalized_id` (assigned a fallback id): **{fallback_count}**")
++    lines += ["", "> Duplicate relationships are analyst-review hypotheses; no finding is deleted automatically.", ""]
++    for c in clusters:
++        lines.append(f"- `{c['cluster_id']}` primary `{c['primary']}`: " + ", ".join(f"`{x}`" for x in c["finding_ids"]))
++    atomic_write_text(rep / "finding-dedup.md", "\n".join(lines) + "\n")
+     return p
+=== diff: modules/execution_orchestrator_v101.py ===
+--- /tmp/execution_orchestrator_v101.orig.py	2026-09-03 10:32:27.496749376 +0000
++++ modules/execution_orchestrator_v101.py	2026-09-03 10:33:34.634055869 +0000
+@@ -6,6 +6,7 @@
+ from .tool_manager_v40 import ToolManager, TOOLS
+ from .result_collector_v43 import collect
+ from .scope import load_scope, filter_in_scope
++from .atomic_io import atomic_write_json, load_json
+ 
+ class ExecutionOrchestrator:
+     """V101 dependency-aware, resumable execution over the registered toolchain."""
+@@ -28,10 +29,20 @@
+         self.tm=ToolManager(self.root)
+     def _load(self):
+         if self.resume and self.state_path.exists():
+-            try:return json.loads(self.state_path.read_text())
+-            except Exception:pass
++            # load_json quarantines a corrupt state file (renames it aside
++            # with a timestamp) instead of the previous bare `except
++            # Exception: pass`, which silently discarded a damaged file
++            # and any diagnostic trace of why resume stopped working.
++            data = load_json(self.state_path, None)
++            if isinstance(data, dict):
++                return data
+         return {'schema_version':'101.0','target':self.target,'started':datetime.now(timezone.utc).isoformat(),'tasks':{}}
+-    def _save(self): self.state_path.write_text(json.dumps(self.state,indent=2),encoding='utf-8')
++    def _save(self):
++        # Atomic write so a killed/interrupted run can't leave a truncated
++        # state file behind -- previously a plain write_text() here meant
++        # an interruption mid-save could corrupt the very state that
++        # 'resumable execution' depends on.
++        atomic_write_json(self.state_path, self.state)
+     def _task(self, tid):
+         return self.state['tasks'].get(tid, {})
+     def _run_tool(self, tid, tool, argv):

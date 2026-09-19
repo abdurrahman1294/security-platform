@@ -1,0 +1,62 @@
+{
+  "policy": "Public/owner-authorized sources only; source terms and rate limits must be respected; no private access or covert tracking.",
+  "schema_version": "161.1",
+  "sources": [
+    {
+      "category": "certificate-transparency",
+      "enabled": true,
+      "id": "crtsh",
+      "mode": "passive",
+      "requires_public_source": true
+    },
+    {
+      "category": "registration",
+      "enabled": true,
+      "id": "rdap",
+      "mode": "passive",
+      "requires_public_source": true
+    },
+    {
+      "category": "web-archive",
+      "enabled": true,
+      "id": "wayback",
+      "mode": "passive",
+      "requires_public_source": true
+    },
+    {
+      "category": "code/public-profile",
+      "enabled": true,
+      "id": "github-public",
+      "mode": "passive",
+      "requires_public_source": true
+    },
+    {
+      "category": "social-profile",
+      "enabled": true,
+      "id": "public-social",
+      "mode": "passive",
+      "requires_public_source": true
+    },
+    {
+      "category": "location-context",
+      "enabled": true,
+      "id": "public-geodata",
+      "mode": "passive",
+      "requires_public_source": true
+    },
+    {
+      "category": "image-metadata/hash",
+      "enabled": true,
+      "id": "local-image",
+      "mode": "local",
+      "requires_public_source": true
+    },
+    {
+      "category": "image-search",
+      "enabled": true,
+      "id": "reverse-image",
+      "mode": "operator-assisted",
+      "requires_public_source": true
+    }
+  ]
+}

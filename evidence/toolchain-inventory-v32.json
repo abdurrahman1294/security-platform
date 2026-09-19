@@ -1,0 +1,74 @@
+[
+  {
+    "name": "assetfinder",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "aws",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "az",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "gcloud",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "httpx",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "katana",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "kubectl",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "naabu",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "nmap",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "nuclei",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "nxc",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  },
+  {
+    "name": "subfinder",
+    "status": "unavailable-or-rejected",
+    "path": "",
+    "detail": ""
+  }
+]

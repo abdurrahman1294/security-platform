@@ -1,0 +1,9 @@
+{
+  "engagement": "lab-engagement-id",
+  "written_authorization": true,
+  "scope_file": "config/scope.example.txt",
+  "allow_high_risk_actions": [
+    "password_spray"
+  ],
+  "notes": "Only list actions explicitly permitted by the signed ROE. Leave empty for safest default."
+}
